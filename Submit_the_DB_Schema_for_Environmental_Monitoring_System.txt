@@ -1,0 +1,121 @@
+//Group number 15
+//Monitoring System
+//100039D
+//100056C
+//100059M
+//100374A
+
+
+
+create table users
+	(username		varchar(20) not null,
+	 hashcode		integer not null,
+	 saltvalue		integer not null,
+	 privilage_level	integer not null,
+	 primary key (username)
+	);
+	
+	
+create table sensor
+	(sensor_id			varchar(10) not null,
+	 sensor_type		varchar(10) not null,
+	 manufacturer		varchar(25) not null,
+	 refresh_time		 time not null,
+	 primary key (sensor_id)
+	);
+
+	//lonitude and latitude should represent in the following format
+	//(3digit).(4digit)(letter) ==> 120.3033N
+create table location
+	(location_id	varchar(10) not null,
+	 name 		varchar(25) not null,
+	 longitude		char(9) not null,
+	 latitude		char(9) not null,
+	 altitude 		numeric(4,4) not null check (attitude < 9000),
+	 street		varchar(20),
+	 city			varchar(20),
+	 country		varchar(20),
+	 primary key (location_id)
+	);
+	
+
+	
+create table contains
+	(location_id	varchar(10) not null,
+	 sensor_id			varchar(10) not null,
+	 established_date	date not null,
+	 primary key (sensor_id),
+	 foreign key (location_id) references location(location_id)
+		on delete cascade,
+	 foreign key (sensor_id) references sensor(sensor_id)
+		on delete cascade
+	);
+	
+	
+	
+	create table serviceprovider
+	(
+	 contract_id	varchar(10) not null,
+	 postbox		varchar(10),
+	 street			varchar(10),
+	 city			varchar(10),
+	 country		varchar(10),
+	 guarantee_period date not null,
+	 expired_on 	date not null,
+	 primary key (contract_id)
+	
+	);
+	//agent is created to put the mulivalues of agent attribute to the service provider
+	create table agent
+	(
+	 contract_id	varchar(10) not null,
+	 agent_name		varchar(50) not null,
+	 telephone		varchar(12) not null
+	);
+	
+	create table maintainance
+	(
+	 contract_id	varchar(10),
+	 sensor_id		varchar(10) not null,
+	 purchase_date		date not null,
+	 primary key (sensor_id),
+	 foreign key (contract_id) references serviceprovider(contract_id)
+		on delete set null,
+	 foreign key (sensor_id) references sensor(sensor_id)
+		on delete cascade
+	);
+	
+	//this kind of tables are created at the application level, once new location is added to the system,
+	//table name having tha following format
+	//    <location_id>_statistics
+	//this table store derived data based on the location and the sensor twice a day.
+	
+	create table location_id_statistics
+	(
+	 day	date not null,
+	 session	varchar(7)	not null,
+	 avg_temp	numeric(4,4),
+	 avg_humidity	numeric(4,4),
+	 avg_rainfall	numeric(4,4),
+	 avg_co2	numeric(4,4),
+	 primary key(day,session)	 
+	);
+	
+	
+	//this kind of tables are created at the application level, once new location is added to the system,
+	//table name having tha following format
+	//    <location_id>_rawdata
+	//this table store raw data based on the location and the sensor
+	
+	create table location_id_rawdata
+	(
+	 sensor_id		varchar(10) not null,
+	 day	date not null,
+	 time	time not null,
+	 value	numeric(4,4) not null,
+	 primary key (sensor_id,day,time)	 	 
+	);
+	
+	
+	
+	
